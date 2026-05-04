@@ -173,7 +173,7 @@ def forgot_password():
             db.session.commit()
 
             # Log the reset URL to console (in production, send email)
-            reset_url = f"http://127.0.0.1:5500?reset_token={token}"
+            reset_url = f"http://127.0.0.1:5500/admin.html?reset_token={token}"
             print(f"\n*** PASSWORD RESET URL ***\n{reset_url}\n")
 
         return jsonify(

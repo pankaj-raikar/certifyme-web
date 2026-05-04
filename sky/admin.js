@@ -1177,5 +1177,88 @@ window.addEventListener("resize", () => {
 // ===== PAGE INITIALIZATION =====
 // On page load, check if user already has an active session
 document.addEventListener("DOMContentLoaded", () => {
-  initializePageOnLoad();
+  // Check for reset token in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const resetToken = urlParams.get("reset_token");
+  if (resetToken) {
+    // Store token and show reset password page
+    window.resetTokenValue = resetToken;
+    showPage("resetPasswordPage");
+    // Clear the URL parameter for security
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } else {
+    initializePageOnLoad();
+  }
 });
+
+// ===== RESET PASSWORD =====
+let resetTokenValue = null;
+
+document
+  .getElementById("resetPasswordForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
+    clearAllErrors("resetPasswordForm");
+
+    let valid = true;
+    const password = document.getElementById("resetPassword").value;
+    const confirmPassword = document.getElementById(
+      "resetConfirmPassword",
+    ).value;
+
+    // Validate password
+    if (!password || password.length < 8) {
+      showError("resetPasswordErr", "Password must be at least 8 characters");
+      document.getElementById("resetPassword").classList.add("error");
+      valid = false;
+    }
+
+    // Validate confirm password
+    if (!confirmPassword) {
+      showError("resetConfirmPasswordErr", "Please confirm your password");
+      document.getElementById("resetConfirmPassword").classList.add("error");
+      valid = false;
+    } else if (password !== confirmPassword) {
+      showError("resetConfirmPasswordErr", "Passwords do not match");
+      document.getElementById("resetConfirmPassword").classList.add("error");
+      valid = false;
+    }
+
+    if (!valid) {
+      shakeForm("resetPasswordForm");
+      return;
+    }
+
+    // Check if we have a token
+    const token = window.resetTokenValue || resetTokenValue;
+    if (!token) {
+      showToast("Invalid or expired reset link. Please request a new one.");
+      showPage("forgotPage");
+      return;
+    }
+
+    // Submit to backend
+    try {
+      const { data, status } = await apiJson("/api/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({
+          token: token,
+          password: password,
+          confirm_password: confirmPassword,
+        }),
+      });
+
+      if (status === 200) {
+        showToast("Password reset successfully! Please log in.");
+        window.resetTokenValue = null;
+        resetTokenValue = null;
+        this.reset();
+        showPage("loginPage");
+      } else {
+        showToast(data.error || "Failed to reset password");
+      }
+    } catch (err) {
+      console.error("Reset password error:", err);
+      showToast("Network error. Please try again.");
+    }
+  });

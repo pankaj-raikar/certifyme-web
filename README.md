@@ -30,12 +30,34 @@
 
 ### Key Features
 
-✅ Admin registration and login with email verification  
-✅ Session-based authentication with "Remember Me" option  
-✅ Create, read, update, delete internship opportunities  
-✅ Multi-admin isolation (data security)  
-✅ Responsive UI with real-time feedback  
-✅ 100% test coverage for critical paths
+- ✅ Admin registration and login with email verification
+- ✅ Session-based authentication with "Remember Me" option
+- ✅ Create, read, update, delete internship opportunities
+- ✅ Multi-admin isolation (data security)
+- ✅ Responsive UI with real-time feedback
+- ✅ 100% test coverage for critical paths
+
+### Screenshots & Feature Previews
+
+#### Opportunity Cards Dashboard
+
+![Opportunity Cards Dashboard](images/opportunities_all_cards_page.jpg)
+_View all created opportunities in a card-based layout_
+
+#### Opportunity Details Modal
+
+![Opportunity Details Modal](images/opportunities_modal_details.jpg)
+_Click on any opportunity card to view full details in a modal_
+
+#### Password Reset Page
+
+![Password Reset Page](images/reset_password_page.jpg)
+_Secure password reset form for account recovery_
+
+#### Password Reset URL (Terminal)
+
+![Password Reset URL Terminal](images/reset_password_url_terminal_ss.jpg)
+_Development console shows the password reset link for testing_
 
 ### Tech Stack
 
