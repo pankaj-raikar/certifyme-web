@@ -181,7 +181,7 @@ class TestLogout:
 
         # Logout
         res = client.post("/api/auth/logout")
-        assert res.status_code == 204
+        assert res.status_code == 200
 
         # Verify logged out
         assert client.get("/api/auth/me").status_code == 401

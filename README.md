@@ -13,7 +13,7 @@
 7. [Frontend Integration](#frontend-integration)
 8. [Authentication Flow](#authentication-flow)
 9. [Opportunity Management Flow](#opportunity-management-flow)
-10. [Running Tests](#🧪-running-tests)
+10. [Running Tests](#running-tests)
 11. [Deployment Guide](#deployment-guide)
 12. [Troubleshooting](#troubleshooting)
 

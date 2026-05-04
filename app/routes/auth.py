@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 import secrets
 import hashlib
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from email_validator import validate_email, EmailNotValidError
 from app.extensions import db
@@ -80,7 +80,8 @@ def signup():
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.exception("Error during signup")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -120,7 +121,8 @@ def login():
         ), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.exception("Error during login")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @auth_bp.route("/logout", methods=["POST"])
@@ -128,7 +130,7 @@ def login():
 def logout():
     """US-1.2: Log out the current admin."""
     logout_user()
-    return jsonify({"message": "Logged out successfully"}), 204
+    return jsonify({"message": "Logged out successfully"}), 200
 
 
 @auth_bp.route("/me", methods=["GET"])
@@ -180,7 +182,8 @@ def forgot_password():
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.exception("Error during forgot_password")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @auth_bp.route("/reset-password", methods=["POST"])
@@ -199,19 +202,7 @@ def reset_password():
         password = data.get("password", "")
         confirm_password = data.get("confirm_password", "")
 
-        errors = {}
-
-        if not password:
-            errors["password"] = "Password is required"
-        elif len(password) < 8:
-            errors["password"] = "Password must be at least 8 characters"
-
-        if password != confirm_password:
-            errors["confirm_password"] = "Passwords do not match"
-
-        if errors:
-            return jsonify({"error": "Validation failed", "fields": errors}), 422
-
+        # Validate token first before any password checks
         if not token:
             return jsonify({"error": "Invalid or expired token"}), 400
 
@@ -230,6 +221,20 @@ def reset_password():
         if reset.used_at is not None:
             return jsonify({"error": "Token already used"}), 400
 
+        # Now validate password
+        errors = {}
+
+        if not password:
+            errors["password"] = "Password is required"
+        elif len(password) < 8:
+            errors["password"] = "Password must be at least 8 characters"
+
+        if password != confirm_password:
+            errors["confirm_password"] = "Passwords do not match"
+
+        if errors:
+            return jsonify({"error": "Validation failed", "fields": errors}), 422
+
         # Update password
         admin = reset.admin
         admin.set_password(password)
@@ -240,4 +245,5 @@ def reset_password():
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.exception("Error during reset_password")
+        return jsonify({"error": "Internal server error"}), 500

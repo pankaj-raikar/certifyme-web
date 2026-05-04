@@ -70,8 +70,9 @@ def admin_b(app):
 @pytest.fixture
 def login_admin_a(client, admin_a):
     """Helper to log in admin A and return client."""
-    client.post(
+    response = client.post(
         "/api/auth/login",
         json={"email": admin_a["email"], "password": admin_a["password"]},
     )
+    assert response.status_code == 200, f"Login failed: {response.get_json()}"
     return client

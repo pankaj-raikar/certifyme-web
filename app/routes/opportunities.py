@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
 from app.extensions import db
 from app.models import Opportunity
@@ -38,14 +38,19 @@ def list_opportunities():
                     "skills": opp.skills,
                     "future_opportunities": opp.future_opportunities,
                     "max_applicants": opp.max_applicants,
-                    "created_at": opp.created_at.isoformat(),
-                    "updated_at": opp.updated_at.isoformat(),
+                    "created_at": opp.created_at.isoformat()
+                    if opp.created_at
+                    else None,
+                    "updated_at": opp.updated_at.isoformat()
+                    if opp.updated_at
+                    else None,
                 }
                 for opp in opportunities
             ]
         ), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.exception("Error listing opportunities")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @opportunities_bp.route("", methods=["POST"])
@@ -67,15 +72,23 @@ def create_opportunity():
     try:
         data = request.get_json() or {}
 
+        # Helper to safely strip string values
+        def safe_strip(value):
+            if value is None:
+                return ""
+            if isinstance(value, str):
+                return value.strip()
+            return str(value).strip()
+
         # Validate required fields
         errors = {}
-        name = data.get("name", "").strip()
-        category = data.get("category", "").strip()
-        duration = data.get("duration", "").strip()
-        start_date = data.get("start_date", "").strip()
-        description = data.get("description", "").strip()
-        skills = data.get("skills", "").strip()
-        future_opportunities = data.get("future_opportunities", "").strip()
+        name = safe_strip(data.get("name"))
+        category = safe_strip(data.get("category"))
+        duration = safe_strip(data.get("duration"))
+        start_date = safe_strip(data.get("start_date"))
+        description = safe_strip(data.get("description"))
+        skills = safe_strip(data.get("skills"))
+        future_opportunities = safe_strip(data.get("future_opportunities"))
         max_applicants = data.get("max_applicants")
 
         if not name:
@@ -140,7 +153,8 @@ def create_opportunity():
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.exception("Error creating opportunity")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @opportunities_bp.route("/<int:opp_id>", methods=["GET"])
@@ -168,13 +182,14 @@ def get_opportunity(opp_id):
                 "skills": opp.skills,
                 "future_opportunities": opp.future_opportunities,
                 "max_applicants": opp.max_applicants,
-                "created_at": opp.created_at.isoformat(),
-                "updated_at": opp.updated_at.isoformat(),
+                "created_at": opp.created_at.isoformat() if opp.created_at else None,
+                "updated_at": opp.updated_at.isoformat() if opp.updated_at else None,
             }
         ), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.exception("Error getting opportunity")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @opportunities_bp.route("/<int:opp_id>", methods=["PUT"])
@@ -239,15 +254,16 @@ def update_opportunity(opp_id):
                 "skills": opp.skills,
                 "future_opportunities": opp.future_opportunities,
                 "max_applicants": opp.max_applicants,
-                "created_at": opp.created_at.isoformat(),
-                "updated_at": opp.updated_at.isoformat(),
+                "created_at": opp.created_at.isoformat() if opp.created_at else None,
+                "updated_at": opp.updated_at.isoformat() if opp.updated_at else None,
                 "message": "Opportunity updated successfully",
             }
         ), 200
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.exception("Error updating opportunity")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @opportunities_bp.route("/<int:opp_id>", methods=["DELETE"])
@@ -266,8 +282,9 @@ def delete_opportunity(opp_id):
         db.session.delete(opp)
         db.session.commit()
 
-        return jsonify({"message": "Opportunity deleted successfully"}), 204
+        return "", 204
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.exception("Error deleting opportunity")
+        return jsonify({"error": "Internal server error"}), 500

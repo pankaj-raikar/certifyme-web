@@ -206,10 +206,11 @@ class TestOwnershipIsolation:
 
         # Login as Admin A
         client = app.test_client()
-        client.post(
+        login_resp = client.post(
             "/api/auth/login",
             json={"email": admin_a["email"], "password": admin_a["password"]},
         )
+        assert login_resp.status_code == 200, f"Login failed: {login_resp.get_json()}"
 
         # Try to access Admin B's opportunity
         res = client.get(f"/api/opportunities/{opp_id}")
@@ -259,10 +260,11 @@ class TestOwnershipIsolation:
 
         # Login as Admin A
         client = app.test_client()
-        client.post(
+        login_resp = client.post(
             "/api/auth/login",
             json={"email": admin_a["email"], "password": admin_a["password"]},
         )
+        assert login_resp.status_code == 200, f"Login failed: {login_resp.get_json()}"
 
         # List should only show A's opportunities
         res = client.get("/api/opportunities")
