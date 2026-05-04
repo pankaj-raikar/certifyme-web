@@ -1,0 +1,78 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+develop-eggs/
+.installed.cfg
+MANIFEST
+pip-wheel-metadata/
+.Python
+
+# ---- Virtual environments ----
+.venv/
+venv/
+env/
+ENV/
+.python-version  # keep tracked if you want to pin via pyenv; remove this line if so
+
+# ---- Environment & secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Flask ----
+instance/
+*.sqlite
+*.sqlite3
+*.db
+
+# ---- Alembic ----
+# Keep migrations/ tracked; only ignore local artifacts if any
+# (do NOT ignore migrations/versions/*.py)
+
+# ---- Testing & coverage ----
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+cookies.txt
+implementation_plan.md
+uv.lock
+# ---- Type checkers / linters ----
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# ---- Editors / IDEs ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ---- Node (if sky/ ever gets a build step) ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---- Logs ----
+*.log
+logs/
