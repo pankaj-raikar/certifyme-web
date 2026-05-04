@@ -1,5 +1,11 @@
 // ===== API HELPER =====
-const API_BASE = "http://127.0.0.1:5000";
+// Dynamically detect API base URL based on environment
+// In production (same origin), use empty string (relative URLs)
+// In development, use explicit backend URL
+const API_BASE =
+  window.location.hostname === "127.0.0.1" && window.location.port === "5500"
+    ? "http://127.0.0.1:5000" // Development: frontend on 5500, backend on 5000
+    : ""; // Production: same origin (empty string = relative URLs)
 
 async function api(path, options = {}) {
   /**

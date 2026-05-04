@@ -1,0 +1,56 @@
+# Docker Compose for CertifyMe Application
+# Use this for local testing or production deployment
+
+version: "3.8"
+
+services:
+  certifyme:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: certifyme-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # REQUIRED: Set these environment variables for production
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-this-in-production}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///instance/app.db}
+      - FLASK_ENV=production
+      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-}
+      - SESSION_LIFETIME_DAYS=${SESSION_LIFETIME_DAYS:-30}
+    volumes:
+      # Persist database data
+      - certifyme-data:/app/instance
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/auth/me"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  certifyme-data:
+    driver: local
+
+# For production with PostgreSQL, uncomment below:
+# services:
+#   postgres:
+#     image: postgres:16-alpine
+#     container_name: certifyme-db
+#     restart: unless-stopped
+#     environment:
+#       - POSTGRES_USER=${POSTGRES_USER:-certifyme}
+#       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-certifyme_password}
+#       - POSTGRES_DB=${POSTGRES_DB:-certifyme}
+#     volumes:
+#       - postgres-data:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-certifyme}"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#
+# volumes:
+#   postgres-data:
+#     driver: local
